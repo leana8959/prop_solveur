@@ -1,8 +1,9 @@
 module Main where
 
+import Control.Arrow (Arrow (second))
+import Data.Function (on)
 import Data.List
 
--- FIXME: What should I put here?
 newtype Proposition = Prop String deriving (Show, Eq)
 
 data Formule
@@ -74,13 +75,13 @@ simp (Ou f1 f2) = case (simp f1, simp f2) of
   (Bottom, Top) -> Top
   (Top, Bottom) -> Top
   (Top, Top) -> Top
-  (f1', f2') -> Et f1' f2'
+  (f1', f2') -> Ou f1' f2'
 simp (Implique f1 f2) = case (simp f1, simp f2) of
   (Bottom, Bottom) -> Top
   (Bottom, Top) -> Top
   (Top, Bottom) -> Bottom
   (Top, Top) -> Top
-  (f1', f2') -> Et f1' f2'
+  (f1', f2') -> Implique f1' f2'
 
 solve :: Formule -> Maybe [(Proposition, Formule)]
 solve f = case simp f of
@@ -92,27 +93,70 @@ solve f = case simp f of
     x <- filter ((== Top) . snd) <$> solve f1
     y <- filter ((== Top) . snd) <$> solve f2
     pure $ union x y
-  Ou f1 f2 -> do
-    x <- filter ((== Top) . snd) <$> solve f1
-    y <- filter ((== Top) . snd) <$> solve f2
-    pure $ intersect x y
-  Implique f1 f2 -> do
-    x <- solve f1
-    y <- filter ((== Top) . snd) <$> solve f2
-    pure $ intersect x y
+  Ou f1 f2 ->
+    let x = filter ((== Top) . snd) <$> solve f1
+        y = filter ((== Top) . snd) <$> solve f2
+    in  if null x then y else x
+  Implique f1 f2 ->
+    -- non p ou q
+    let x = filter ((== Bottom) . snd) <$> solve f1
+        y = filter ((== Top) . snd) <$> solve f2
+    in  if null x then y else x
 
-a, b :: Proposition
-a = Prop "a"
-b = Prop "b"
+exempleNon :: Formule
+exempleNon =
+  Non (P (Prop "a"))
 
-example :: Formule
-example =
+exempleEt :: Formule
+exempleEt =
   Et
     (P (Prop "a"))
     (P (Prop "b"))
 
--- >>> solve example
--- Just [(Prop "test",Top),(Prop "b",Top)]
+exempleOu :: Formule
+exempleOu =
+  Ou
+    (P (Prop "a"))
+    (P (Prop "b"))
+
+exempleImprique :: Formule
+exempleImprique =
+  Et
+    ( Ou
+        (P (Prop "a"))
+        (P (Prop "b"))
+    )
+    ( Et
+        (P (Prop "b"))
+        (P (Prop "c"))
+    )
+
+exempleImprique' :: Formule
+exempleImprique' =
+  Et
+    ( Ou
+        (P (Prop "a"))
+        (P (Prop "b"))
+    )
+    ( Et
+        (P (Prop "b"))
+        Top
+    )
+
+exempleImplique :: Formule
+exempleImplique =
+  Implique
+    (P (Prop "a"))
+    (P (Prop "b"))
+
+exempleImplique' :: Formule
+exempleImplique' =
+  Implique
+    Bottom
+    (P (Prop "b"))
+
+-- >>> solve exempleImplique'
+-- Just [(Prop "b",Top)]
 
 main :: IO ()
 main = putStrLn "Hello, Haskell!"
