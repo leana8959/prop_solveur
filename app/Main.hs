@@ -1,10 +1,11 @@
 module Main where
 
 import Control.Arrow (Arrow (second))
-import Data.Function (on)
 import Data.List
-import qualified Data.Map.Strict as M
 import qualified Data.Set as S
+
+import Debug.Trace (traceShowId)
+import Prelude hiding (negate)
 
 type Ident = String
 newtype Proposition = Prop Ident deriving (Show, Eq, Ord)
@@ -89,5 +90,57 @@ sousFormuleStricte f = case f of
         f2' = sousFormuleStricte f2
     in  S.union this (S.union f1' f2')
 
-main :: IO ()
-main = putStrLn "Hello, Haskell!"
+type Valuation = [(Proposition, Bool)]
+
+gen :: [Proposition] -> [Valuation]
+gen ps =
+  let l = length ps
+      perm 0 = []
+      perm 1 = [[True], [False]]
+      perm n = [p : t | p <- [True, False], t <- perm (n - 1)]
+  in  map (zip ps) (perm l)
+
+negate :: Valuation -> Valuation
+negate = map (second not)
+
+findProp :: Formule -> [Proposition]
+findProp f = case f of
+  (P p) -> [p]
+  Non f -> findProp f
+  Et f1 f2 -> findProp f1 ++ findProp f2
+  Ou f1 f2 -> findProp f1 ++ findProp f2
+  Implique f1 f2 -> findProp f1 ++ findProp f2
+  _ -> []
+
+eval :: Formule -> Valuation -> Bool
+eval f vs = case f of
+  Top -> True
+  Bottom -> False
+  P p -> any (\(prop, v) -> prop == p && v) vs
+  Non f -> eval f (negate vs)
+  Et f1 f2 -> eval f1 vs && eval f2 vs
+  Ou f1 f2 -> eval f1 vs || eval f2 vs
+  Implique f1 f2 -> eval f1 (negate vs) || eval f2 vs
+
+solve :: Formule -> [Valuation]
+solve f =
+  let props = gen $ findProp f
+      res = map (eval f) props
+      ts = map fst . filter snd $ zip props res
+  in  ts
+
+p = P $ Prop "p"
+q = P $ Prop "q"
+
+f1 = Et Top p
+f2 = Ou Top p
+f3 = Non p
+f4 = Et p q
+f5 = Ou p q
+
+showExamples :: [Formule] -> [IO ()]
+showExamples fs = putStrLn . uncurry showFormule <$> zip [0 ..] fs
+  where
+    showFormule i f = unlines ["exemple nº" ++ show i, show f, show $ solve f]
+
+main = sequence $ showExamples [f1, f2, f3, f4, f5]
