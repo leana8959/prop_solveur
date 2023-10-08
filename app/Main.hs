@@ -112,6 +112,9 @@ findProp f = case f of
   Implique f1 f2 -> findProp f1 ++ findProp f2
   _ -> []
 
+findPropNub :: Formule -> [Proposition]
+findPropNub = nub . findProp
+
 eval :: Formule -> Valuation -> Bool
 eval f vs = case f of
   Top -> True
@@ -124,7 +127,7 @@ eval f vs = case f of
 
 solve :: Formule -> [Valuation]
 solve f =
-  let props = gen $ findProp f
+  let props = gen $ findPropNub f
       res = map (eval f) props
       ts = map fst . filter snd $ zip props res
   in  ts
@@ -132,15 +135,18 @@ solve f =
 p = P $ Prop "p"
 q = P $ Prop "q"
 
-f1 = Et Top p
-f2 = Ou Top p
-f3 = Non p
-f4 = Et p q
-f5 = Ou p q
-
 showExamples :: [Formule] -> [IO ()]
 showExamples fs = putStrLn . uncurry showFormule <$> zip [0 ..] fs
   where
     showFormule i f = unlines ["exemple nº" ++ show i, show f, show $ solve f]
 
-main = sequence $ showExamples [f1, f2, f3, f4, f5]
+main =
+  sequence $
+    showExamples
+      [ Et Top p,
+        Ou Top p,
+        Non p,
+        Et p q,
+        Ou p q,
+        Et p p
+      ]
