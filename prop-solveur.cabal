@@ -1,5 +1,5 @@
 cabal-version:      2.4
-name:               haskell-1st-order-logic
+name:               prop-solveur
 version:            0.1.0.0
 
 -- A short (one-line) description of the package.
@@ -21,7 +21,7 @@ maintainer:         leana.jiang@icloud.com
 -- category:
 extra-source-files: CHANGELOG.md
 
-executable haskell-1st-order-logic
+executable prop-solveur
   main-is:          Main.hs
 
   -- Modules included in this executable, other than Main.
