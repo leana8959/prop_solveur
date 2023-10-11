@@ -100,9 +100,6 @@ gen ps =
       perm n = [p : t | p <- [True, False], t <- perm (n - 1)]
   in  map (zip ps) (perm l)
 
-negate :: Valuation -> Valuation
-negate = map (second not)
-
 findProp :: Formule -> [Proposition]
 findProp f = case f of
   (P p) -> [p]
@@ -120,10 +117,10 @@ eval f vs = case f of
   Top -> True
   Bottom -> False
   P p -> any (\(prop, v) -> prop == p && v) vs
-  Non f -> eval f (negate vs)
+  Non f -> not $ eval f vs
   Et f1 f2 -> eval f1 vs && eval f2 vs
   Ou f1 f2 -> eval f1 vs || eval f2 vs
-  Implique f1 f2 -> eval f1 (negate vs) || eval f2 vs
+  Implique f1 f2 -> not (eval f1 vs) || eval f2 vs
 
 solve :: Formule -> [Valuation]
 solve f =
