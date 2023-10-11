@@ -20,6 +20,7 @@ data Formule
 
 type Valuation = M.Map Proposition Bool
 
+-- | Générer toutes les valuations possible (ensemble `Val`)
 gen :: [Proposition] -> [Valuation]
 gen ps =
   let l      = length ps
@@ -28,6 +29,7 @@ gen ps =
       perm n = [p : t | p <- [True, False], t <- perm (n - 1)]
   in  map (M.fromList . zip ps) (perm l)
 
+-- | Trouver toutes les propositions
 findProp :: Formule -> [Proposition]
 findProp =
   let go :: Formule -> S.Set Proposition
@@ -39,7 +41,7 @@ findProp =
       go _                = S.empty
   in S.toList . go
 
-
+-- | Evaluer une formule étant donné une valuation
 eval :: Formule -> Valuation -> Bool
 eval f vs = case f of
   Top            -> True
@@ -50,6 +52,7 @@ eval f vs = case f of
   Ou f1 f2       -> eval f1 vs || eval f2 vs
   Implique f1 f2 -> not (eval f1 vs) || eval f2 vs
 
+-- | Trouver toutes les valuations qui satisfait une formule
 solve :: Formule -> [Valuation]
 solve f =
   let props = gen $ findProp f
@@ -57,18 +60,23 @@ solve f =
       ts = map fst . filter snd $ zip props res
   in  ts
 
-p = P $ Prop "p"
-q = P $ Prop "q"
-
 showExamples :: [Formule] -> [IO ()]
 showExamples fs = putStrLn . uncurry showFormule <$> zip [1 ..] fs
   where
-    showFormule i f = unlines ["exemple nº" ++ show i, show f, show $ findProp f, show $ solve f]
+    showFormule i f = unlines
+      [ "exemple nº" ++ show i
+      , "Formule : " ++  show f
+      , "Contient les propositions: " ++ show (findProp f)
+      , "Solutions: " ++ show (solve f)
+      ]
 
+p = P $ Prop "p"
+q = P $ Prop "q"
 j = P $ Prop "j"
 r = P $ Prop "r"
 l = P $ Prop "l"
 
+-- | exemple d’une liste de formule où chaque formule est connecté avec `Et`
 s =
   foldl1
     Et
