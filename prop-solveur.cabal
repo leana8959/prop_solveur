@@ -24,14 +24,18 @@ extra-source-files: CHANGELOG.md
 executable prop-solveur
   main-is:          Main.hs
 
-  -- Modules included in this executable, other than Main.
-  -- other-modules:
+  other-modules:
+    Types
+    Parser
+    Solver
 
   -- LANGUAGE extensions used by modules in this package.
   -- other-extensions:
   build-depends:
     , base        ^>=4.16.4.0
     , containers
+    , megaparsec
+    , parser-combinators
 
   hs-source-dirs:   app
   default-language: Haskell2010
