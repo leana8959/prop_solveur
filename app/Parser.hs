@@ -1,6 +1,6 @@
 module Parser where
 
-import           Data.Char                  (isAlphaNum)
+import           Data.Char                  (isAlpha)
 import           Data.Void
 import           Text.Megaparsec
 import           Text.Megaparsec.Char
@@ -20,7 +20,7 @@ symbol :: String -> Lexer String
 symbol = L.symbol sc
 
 pIdent :: Lexer String
-pIdent = lexeme (takeWhile1P Nothing isAlphaNum)
+pIdent = lexeme (takeWhile1P Nothing isAlpha)
 
 parens :: Lexer a -> Lexer a
 parens = try . between (symbol "(") (symbol ")")
@@ -37,10 +37,10 @@ pImplies = parens $ Implies <$> pFormula <* symbol "->" <*> pFormula
 pFormula :: Lexer Formula
 pFormula = choice
   [ pImplies
-  , pNot
   , pAnd
   , pOr
-  , pP
+  , pNot
   , pBottom
   , pTop
+  , pP
   ]

@@ -31,7 +31,7 @@ eval f vs = case f of
   Top           -> True
   Bottom        -> False
   P p           -> vs M.! p
-  Not f         -> not ( eval f vs)
+  Not f         -> not (eval f vs)
   And f1 f2     -> eval f1 vs && eval f2 vs
   Or f1 f2      -> eval f1 vs || eval f2 vs
   Implies f1 f2 -> not (eval f1 vs) || eval f2 vs
@@ -39,20 +39,20 @@ eval f vs = case f of
 -- | Trouver toutes les valuations qui satisfait une formule
 solve :: Formula -> [Valuation]
 solve f =
-  let props = gen $ findProp f
-      res   = map (eval f) props
-      ts    = map fst . filter snd $ zip props res
+  let vals = gen $ findProp f
+      res  = map (eval f) vals
+      ts   = map fst . filter snd $ zip vals res
   in  ts
 
-showExamples :: [Formula] -> [IO ()]
-showExamples fs = putStrLn . uncurry showFormule <$> zip [1 ..] fs
-  where
-    showFormule i f = unlines
-      [ "exemple nº" ++ show i
-      , "Formule : " ++  show f
-      , "Contient les propositions: " ++ show (findProp f)
-      , "Solutions: " ++ show (solve f)
-      ]
+-- showExamples :: [Formula] -> [IO ()]
+-- showExamples fs = putStrLn . uncurry showFormule <$> zip [1 ..] fs
+--   where
+--     showFormule i f = unlines
+--       [ "exemple nº" ++ show i
+--       , "Formule : " ++  show f
+--       , "Contient les propositions: " ++ show (findProp f)
+--       , "Solutions: " ++ show (solve f)
+--       ]
 
 -- Old examples
 -- p = P $ Prop "p"
