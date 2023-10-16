@@ -53,10 +53,10 @@ pComposite = choice
   , pOr
   , pNot
   ]
-pTermOrComposite = parens pComposite <|> pTerm
+pTermOrComposite = try $ parens pComposite <|> pTerm
 
 pFormula :: Lexer Formula
 pFormula = choice
   [ pComposite
   , pTerm
-  ]
+  ] <* eof
