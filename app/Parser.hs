@@ -1,4 +1,4 @@
-module Parser where
+module Parser (pFormula) where
 
 import           Data.Char                  (isAlpha)
 import           Data.Void
@@ -33,12 +33,12 @@ sepBy2 p sp = try $ do
   return $ one : rest
 
 pBottom, pTop, pP, pNot, pAnd, pOr, pImplies :: Lexer Formula
-pBottom  = Bottom <$ symbol "bot"
-pTop     = Top <$ symbol "top"
-pP       = P . Prop <$> pIdent
-pNot     = Not <$ symbol "not" <*> pTermOrComposite
-pAnd     = foldl1 And <$> sepBy2 pTermOrComposite (symbol "and")
-pOr      = foldl1 Or <$> sepBy2 pTermOrComposite (symbol "or")
+pBottom  = Bottom         <$  symbol "bot"
+pTop     = Top            <$  symbol "top"
+pP       = P . Prop       <$> pIdent
+pNot     = Not            <$  symbol "not" <*> pTermOrComposite
+pAnd     = foldl1 And     <$> sepBy2 pTermOrComposite (symbol "and")
+pOr      = foldl1 Or      <$> sepBy2 pTermOrComposite (symbol "or")
 pImplies = foldl1 Implies <$> sepBy2 pTermOrComposite (symbol "->")
 
 pTerm, pComposite, pTermOrComposite :: Lexer Formula
