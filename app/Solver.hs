@@ -1,5 +1,6 @@
 module Solver where
 
+import           Data.Foldable   (Foldable (toList))
 import qualified Data.Map.Strict as M
 import qualified Data.Set        as S
 import           Types
@@ -43,6 +44,14 @@ solve f =
       res  = map (eval f) vals
       ts   = map fst . filter snd $ zip vals res
   in  ts
+
+showSolution :: Valuation -> Int -> String
+showSolution v i = unlines $
+  ("solution nº" ++ show i) :
+    map (\(Prop p, value) -> p ++ ": " ++ show value) (M.toList v)
+
+showSolutions :: [Valuation] -> String
+showSolutions vs = unlines $ uncurry showSolution <$> zip vs [1..]
 
 -- showExamples :: [Formula] -> [IO ()]
 -- showExamples fs = putStrLn . uncurry showFormule <$> zip [1 ..] fs

@@ -23,24 +23,40 @@ pIdent :: Lexer String
 pIdent = lexeme (takeWhile1P Nothing isAlpha)
 
 parens :: Lexer a -> Lexer a
-parens = try . between (symbol "(") (symbol ")")
+parens = between (symbol "(") (symbol ")")
+
+sepBy2 :: Lexer a -> Lexer b -> Lexer [a]
+sepBy2 p sp = try $ do
+  one  <- p
+  sp
+  rest <- sepBy1 p sp
+  return $ one : rest
 
 pBottom, pTop, pP, pNot, pAnd, pOr, pImplies :: Lexer Formula
 pBottom  = Bottom <$ symbol "bot"
 pTop     = Top <$ symbol "top"
 pP       = P . Prop <$> pIdent
-pNot     = parens $ Not <$ symbol "not" <*> pFormula
-pAnd     = parens $ And <$> pFormula <* symbol "and" <*> pFormula
-pOr      = parens $ Or <$> pFormula <* symbol "or" <*> pFormula
-pImplies = parens $ Implies <$> pFormula <* symbol "->" <*> pFormula
+pNot     = Not <$ symbol "not" <*> pTermOrComposite
+pAnd     = foldl1 And <$> sepBy2 pTermOrComposite (symbol "and")
+pOr      = foldl1 Or <$> sepBy2 pTermOrComposite (symbol "or")
+pImplies = foldl1 Implies <$> sepBy2 pTermOrComposite (symbol "->")
 
-pFormula :: Lexer Formula
-pFormula = choice
+pTerm, pComposite, pTermOrComposite :: Lexer Formula
+pTerm = choice
+  [ pBottom
+  , pTop
+  , pP
+  ]
+pComposite = choice
   [ pImplies
   , pAnd
   , pOr
   , pNot
-  , pBottom
-  , pTop
-  , pP
+  ]
+pTermOrComposite = parens pComposite <|> pTerm
+
+pFormula :: Lexer Formula
+pFormula = choice
+  [ pComposite
+  , pTerm
   ]

@@ -13,8 +13,12 @@ main = do
     _ -> do
       case runParser pFormula "stdin" s of
         Right r -> do
-          putStrLn $ "You entered: " ++ show r
-          putStrLn $ "Solutions are: " ++ show (solve r)
+          putStrLn $ unlines [
+              "You entered: ",
+              show r,
+              "Solutions are: ",
+              showSolutions (solve r)
+            ]
         Left err ->
           putStrLn $ "Failed to parse: " ++ show err
       main
