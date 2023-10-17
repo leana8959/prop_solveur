@@ -39,7 +39,9 @@ pP       = P . Prop       <$> pIdent
 pNot     = Not            <$  symbol "not" <*> pTermOrComposite
 pAnd     = foldl1 And     <$> sepBy2 pTermOrComposite (symbol "and")
 pOr      = foldl1 Or      <$> sepBy2 pTermOrComposite (symbol "or")
-pImplies = foldl1 Implies <$> sepBy2 pTermOrComposite (symbol "->")
+pImplies = foldl1 Implies <$> sepBy2 pTermOrComposite arrow
+  where
+    arrow = symbol "->" <|> symbol "=>"
 
 pTerm, pComposite, pTermOrComposite :: Lexer Formula
 pTerm = choice
