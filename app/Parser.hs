@@ -32,16 +32,19 @@ sepBy2 p sp = try $ do
   rest <- sepBy1 p sp
   return $ one : rest
 
+arrowSymbol = symbol "->"  <|> symbol "=>"
+notSymbol   = symbol "not" <|> symbol "~"
+andSymbol   = symbol "and" <|> symbol "^"
+orSymbol    = symbol "or"  <|> symbol "v"
+
 pBottom, pTop, pP, pNot, pAnd, pOr, pImplies :: Lexer Formula
 pBottom  = Bottom         <$  symbol "bot"
 pTop     = Top            <$  symbol "top"
 pP       = P . Prop       <$> pIdent
-pNot     = Not            <$  symbol "not" <*> pTermOrComposite
-pAnd     = foldl1 And     <$> sepBy2 pTermOrComposite (symbol "and")
-pOr      = foldl1 Or      <$> sepBy2 pTermOrComposite (symbol "or")
-pImplies = foldl1 Implies <$> sepBy2 pTermOrComposite arrow
-  where
-    arrow = symbol "->" <|> symbol "=>"
+pNot     = Not            <$  notSymbol <*> pTermOrComposite
+pAnd     = foldl1 And     <$> sepBy2 pTermOrComposite andSymbol
+pOr      = foldl1 Or      <$> sepBy2 pTermOrComposite orSymbol
+pImplies = foldl1 Implies <$> sepBy2 pTermOrComposite arrowSymbol
 
 pTerm, pComposite, pTermOrComposite :: Lexer Formula
 pTerm = choice
