@@ -2,10 +2,14 @@ module Main where
 
 import           Parser
 import           Solver
-import           System.Exit     (exitSuccess)
-import           Text.Megaparsec (runParser)
+import           System.Environment
+import           System.Exit
+import           System.IO
+import           Text.Megaparsec
+import           Types
 
-main = do
+repl :: IO ()
+repl = do
   putStrLn "Please enter a logical formula, :q to quit"
   s <- getLine
   case s of
@@ -20,5 +24,23 @@ main = do
               showSolutions (solve r)
             ]
         Left err ->
-          putStrLn $ "Failed to parse: " ++ show err
-      main
+          putStrLn $ unlines ["Failed to parse: ", show err]
+      repl
+
+main = do
+  args <- getArgs
+  case args of
+    (flag : fname : _) | flag == "-f" -> do
+      handle <- openFile fname ReadMode
+      contents <- hGetContents handle
+      let ps = [ p | (Right p) <- runParser pFormula "file" <$> lines contents]
+      let p = foldl1 And ps
+
+      putStrLn $ unlines [
+          "You entered: ",
+          show p,
+          "Solutions are: ",
+          showSolutions (solve p)
+        ]
+
+    _ -> repl

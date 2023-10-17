@@ -1,6 +1,6 @@
 module Parser (pFormula) where
 
-import           Data.Char                  (isAlpha)
+import           Data.Char
 import           Data.Void
 import           Text.Megaparsec
 import           Text.Megaparsec.Char
@@ -11,7 +11,7 @@ type Input = String
 type Lexer = Parsec Void Input
 
 sc :: Lexer ()
-sc = L.space space1 empty empty
+sc = L.space hspace1 empty empty
 
 lexeme :: Lexer a -> Lexer a
 lexeme = L.lexeme sc
@@ -58,10 +58,12 @@ pComposite = choice
   , pOr
   , pNot
   ]
-pTermOrComposite = try $ parens pComposite <|> pTerm
+pTermOrComposite = parens pComposite <|> pTerm
 
 pFormula :: Lexer Formula
-pFormula = choice
-  [ pComposite
-  , pTerm
-  ] <* eof
+pFormula = (parens p <|> p) <* eof
+  where
+    p = choice
+      [ pComposite
+      , pTerm
+      ]

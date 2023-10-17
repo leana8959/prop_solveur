@@ -1,6 +1,6 @@
 module Solver where
 
-import           Data.Foldable   (Foldable (toList))
+import           Data.Foldable
 import qualified Data.Map.Strict as M
 import qualified Data.Set        as S
 import           Types
@@ -52,42 +52,3 @@ showSolution v i = unlines $
 
 showSolutions :: [Valuation] -> String
 showSolutions vs = unlines $ uncurry showSolution <$> zip vs [1..]
-
--- showExamples :: [Formula] -> [IO ()]
--- showExamples fs = putStrLn . uncurry showFormule <$> zip [1 ..] fs
---   where
---     showFormule i f = unlines
---       [ "exemple nº" ++ show i
---       , "Formule : " ++  show f
---       , "Contient les propositions: " ++ show (findProp f)
---       , "Solutions: " ++ show (solve f)
---       ]
-
--- Old examples
--- p = P $ Prop "p"
--- q = P $ Prop "q"
--- j = P $ Prop "j"
--- r = P $ Prop "r"
--- l = P $ Prop "l"
---
--- -- | exemple d’une liste de formule où chaque formule est connecté avec `Et`
--- s =
---   foldl1
---     And
---     [ Not j `Implies` r
---     , Not r `Implies` l
---     , j `Or` r `Or` l
---     , Not (j `And` r) `And` Not (j `And` l) `And` Not (r `And` l)
---     ]
---
--- main =
---   sequence $
---     showExamples
---       [ And Top p
---       , Or Top p
---       , Not p
---       , And p q
---       , And p p
---       , Or p q
---       , s
---       ]
