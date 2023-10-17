@@ -1,4 +1,4 @@
-# Revision history for haskell-1st-order-logic
+# Revision history for prop-solveur
 
 ## 0.1.0.0 -- YYYY-mm-dd
 
