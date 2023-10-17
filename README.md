@@ -7,7 +7,12 @@ This is an exponential operation, more sophisticated heuristics are planned to b
 
 # Execution
 1. Install `ghcup` with your favorite package manager, then install `cabal` with `ghcup`.
-2. Run `cabal run` to execute the program. Have fun :)
+2. Run `cabal run` to execute the program.
 
 # Read from file
 Use `cabal run prop-solveur -- -f [file_name]` to run with file as input.
+
+# Installation
+If you want to use this tool anywhere, simply do `cabal install .`. Make sure that `$HOME/.cabal/bin` is in your `$PATH`.
+
+Have fun :)
