@@ -1,13 +1,42 @@
 module Main where
 
-import Parser
-import Solver
 import System.Environment
 import System.Exit
 import System.IO
-import Text.Megaparsec
-import Text.Megaparsec.Char (eol)
+
+import System.Console.ANSI
+
+import Parser
+import Solver
+import Text.Megaparsec (runParser)
 import Types
+
+accentStyle = setSGR [SetColor Foreground Vivid Blue, SetConsoleIntensity BoldIntensity]
+decorStyle = setSGR [SetColor Foreground Dull Black, SetConsoleIntensity NormalIntensity]
+errorStyle = setSGR [SetColor Foreground Vivid Red, SetConsoleIntensity BoldIntensity]
+resetStyle = setSGR [Reset]
+
+putInfo prompt text =
+  do
+    let w = ((80 - length prompt) `div` 2) - 2
+    let line = replicate w '='
+
+    decorStyle <* putStr (line ++ " ") <* resetStyle
+    accentStyle <* putStr prompt <* resetStyle
+    decorStyle <* putStr (" " ++ line) <* resetStyle <* putStrLn ""
+
+    putStrLn text
+
+putError prompt text =
+  do
+    let w = ((80 - length prompt) `div` 2) - 2
+    let line = replicate w '='
+
+    decorStyle <* putStr (line ++ " ") <* resetStyle
+    errorStyle <* putStr prompt <* resetStyle
+    decorStyle <* putStr (" " ++ line) <* resetStyle <* putStrLn ""
+
+    putStrLn text
 
 repl = do
   putStrLn "Please enter a logical formula, :q to quit"
@@ -17,17 +46,12 @@ repl = do
     _ -> do
       case runParser pFormula "stdin" line of
         Right res -> do
-          putStrLn
-            $ unlines
-              [ "You entered: "
-              , line
-              , "Parsed: "
-              , show res
-              , "Solutions are: "
-              , showSolutions (solve res)
-              ]
-        Left err ->
-          putStrLn $ unlines ["Failed to parse: ", show err]
+          let sol = solve res
+          putInfo "You entered" line
+          putInfo "Parsed" (show res)
+          putInfo "Solutions" (showSolutions sol)
+          putInfo ("There are " ++ show (length sol) ++ " solution(s)") ""
+        Left err -> putError "Failed to parse" (show err)
       repl
 
 fileMode fname =
@@ -37,20 +61,13 @@ fileMode fname =
     case runParser pFormula "file" content of
       Right res ->
         do
-          putStrLn
-            $ unlines
-              [ "File contains: "
-              , show (lines content)
-              , "Parsed: "
-              , show res
-              , "Solutions are: "
-              , showSolutions (solve res)
-              ]
+          let sol = solve res
+          putInfo "File contains" content
+          putInfo "Parsed" (show res)
+          putInfo "Solutions" (showSolutions sol)
+          putInfo ("There are " ++ show (length sol) ++ " solution(s)") ""
           exitSuccess
-      Left err ->
-        do
-          putStrLn $ unlines ["Failed to parse: ", show err]
-          exitFailure
+      Left err -> putError "Failed to parse" (show err)
 
 main = do
   args <- getArgs
