@@ -25,6 +25,9 @@ pIdent = lexeme (takeWhile1P Nothing isAlpha)
 parens :: Parser a -> Parser a
 parens = between (symbol "(") (symbol ")")
 
+sepBy2 :: Parser a -> Parser b -> Parser [a]
+sepBy2 p sp = try $ (:) <$> p <* sp <*> sepBy1 p sp
+
 impliesSymbol = symbol "->" <|> symbol "=>"
 notSymbol = symbol "not" <|> symbol "~"
 andSymbol = symbol "and" <|> symbol "^"
@@ -44,10 +47,10 @@ pNot :: Parser Formula
 pNot = try (Not <$ notSymbol <*> pSimple) <|> pSimple
 
 pOr :: Parser Formula
-pOr = try (Or <$> pNot <* orSymbol <*> pNot) <|> pNot
+pOr = try (foldl1 Or <$> sepBy2 pNot orSymbol) <|> pNot
 
 pAnd :: Parser Formula
-pAnd = try (And <$> pOr <* andSymbol <*> pOr) <|> pOr
+pAnd = try (foldl1 And <$> sepBy2 pOr andSymbol) <|> pOr
 
 pImplies :: Parser Formula
 pImplies = try (Implies <$> pAnd <* impliesSymbol <*> pAnd) <|> pAnd

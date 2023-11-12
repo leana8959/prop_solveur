@@ -59,3 +59,17 @@ spec = describe
           , Just (Or (And (P (Prop "a")) (P (Prop "b"))) (P (Prop "c")))
           )
         ]
+    it "and should be associative"
+      $ validate
+        [
+          ( run "a and b and c"
+          , Just (And (And (P (Prop "a")) (P (Prop "b"))) (P (Prop "c")))
+          )
+        ]
+    it "or should be associative"
+      $ validate
+        [
+          ( run "a or b or c"
+          , Just (Or (Or (P (Prop "a")) (P (Prop "b"))) (P (Prop "c")))
+          )
+        ]
