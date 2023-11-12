@@ -73,3 +73,20 @@ spec = describe
           , Just (Or (Or (P (Prop "a")) (P (Prop "b"))) (P (Prop "c")))
           )
         ]
+    it "should pass more tests hehe"
+      $ validate
+        [
+          ( run "p v q v r and (p -> ~q) and (q -> ~r) and (r -> ~p)"
+          , Just
+              ( And
+                  ( And
+                      ( And
+                          (Or (Or (P (Prop "p")) (P (Prop "q"))) (P (Prop "r")))
+                          (Implies (P (Prop "p")) (Not (P (Prop "q"))))
+                      )
+                      (Implies (P (Prop "q")) (Not (P (Prop "r"))))
+                  )
+                  (Implies (P (Prop "r")) (Not (P (Prop "p"))))
+              )
+          )
+        ]
