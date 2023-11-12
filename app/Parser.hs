@@ -1,69 +1,59 @@
 module Parser (pFormula) where
 
-import           Data.Char
-import           Data.Void
-import           Text.Megaparsec
-import           Text.Megaparsec.Char
+import Data.Char
+import Data.Void
+import Text.Megaparsec
+import Text.Megaparsec.Char
 import qualified Text.Megaparsec.Char.Lexer as L
-import           Types
+import Types
 
 type Input = String
-type Lexer = Parsec Void Input
+type Parser = Parsec Void Input
 
-sc :: Lexer ()
+sc :: Parser ()
 sc = L.space hspace1 empty empty
 
-lexeme :: Lexer a -> Lexer a
+lexeme :: Parser a -> Parser a
 lexeme = L.lexeme sc
 
-symbol :: String -> Lexer String
+symbol :: String -> Parser String
 symbol = L.symbol sc
 
-pIdent :: Lexer String
+pIdent :: Parser String
 pIdent = lexeme (takeWhile1P Nothing isAlpha)
 
-parens :: Lexer a -> Lexer a
+parens :: Parser a -> Parser a
 parens = between (symbol "(") (symbol ")")
 
-sepBy2 :: Lexer a -> Lexer b -> Lexer [a]
-sepBy2 p sp = try $ do
-  one  <- p
-  sp
-  rest <- sepBy1 p sp
-  return $ one : rest
+impliesSymbol = symbol "->" <|> symbol "=>"
+notSymbol = symbol "not" <|> symbol "~"
+andSymbol = symbol "and" <|> symbol "^"
+orSymbol = symbol "or" <|> symbol "v"
 
-arrowSymbol = symbol "->"  <|> symbol "=>"
-notSymbol   = symbol "not" <|> symbol "~"
-andSymbol   = symbol "and" <|> symbol "^"
-orSymbol    = symbol "or"  <|> symbol "v"
+pTop, pBot :: Parser Formula
+pTop = Top <$ symbol "top"
+pBot = Bottom <$ symbol "bot"
 
-pBottom, pTop, pP, pNot, pAnd, pOr, pImplies :: Lexer Formula
-pBottom  = Bottom         <$  symbol "bot"
-pTop     = Top            <$  symbol "top"
-pP       = P . Prop       <$> pIdent
-pNot     = Not            <$  notSymbol <*> pTermOrComposite
-pAnd     = foldl1 And     <$> sepBy2 pTermOrComposite andSymbol
-pOr      = foldl1 Or      <$> sepBy2 pTermOrComposite orSymbol
-pImplies = foldl1 Implies <$> sepBy2 pTermOrComposite arrowSymbol
+pProp :: Parser Formula
+pProp = P . Prop <$> pIdent
 
-pTerm, pComposite, pTermOrComposite :: Lexer Formula
-pTerm = choice
-  [ pBottom
-  , pTop
-  , pP
-  ]
-pComposite = choice
-  [ pImplies
-  , pAnd
-  , pOr
-  , pNot
-  ]
-pTermOrComposite = parens pComposite <|> pTerm
+pSimple :: Parser Formula
+pSimple = parens pExpr <|> pTop <|> pBot <|> pProp
 
-pFormula :: Lexer Formula
-pFormula = (parens p <|> p) <* eof
-  where
-    p = choice
-      [ pComposite
-      , pTerm
-      ]
+pNot :: Parser Formula
+pNot = try (Not <$ notSymbol <*> pSimple) <|> pSimple
+
+pOr :: Parser Formula
+pOr = try (Or <$> pNot <* orSymbol <*> pNot) <|> pNot
+
+pAnd :: Parser Formula
+pAnd = try (And <$> pOr <* andSymbol <*> pOr) <|> pOr
+
+pImplies :: Parser Formula
+pImplies = try (Implies <$> pAnd <* impliesSymbol <*> pAnd) <|> pAnd
+
+pExpr :: Parser Formula
+pExpr = pImplies
+
+pFormula :: Parser Formula
+pFormula = pExpr <* eof
