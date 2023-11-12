@@ -5,6 +5,7 @@ import System.Exit
 import System.IO
 
 import System.Console.ANSI
+import Text.Pretty.Simple (pPrint)
 
 import Parser
 import Solver
@@ -48,7 +49,7 @@ repl = do
         Right res -> do
           let sol = solve res
           putInfo "You entered" line
-          putInfo "Parsed" (show res)
+          putInfo "Parsed" "" <* pPrint res
           putInfo "Solutions" (showSolutions sol)
           putInfo ("There are " ++ show (length sol) ++ " solution(s)") ""
         Left err -> putError "Failed to parse" (show err)
@@ -63,7 +64,7 @@ fileMode fname =
         do
           let sol = solve res
           putInfo "File contains" content
-          putInfo "Parsed" (show res)
+          putInfo "Parsed" "" <* pPrint res
           putInfo "Solutions" (showSolutions sol)
           putInfo ("There are " ++ show (length sol) ++ " solution(s)") ""
           exitSuccess

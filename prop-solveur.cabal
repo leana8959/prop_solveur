@@ -36,6 +36,7 @@ executable prop-solveur
     , megaparsec
     , parser-combinators
     , ansi-terminal
+    , pretty-simple
 
 test-suite prop-solveur-spec
   hs-source-dirs:   test app
