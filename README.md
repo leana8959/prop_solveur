@@ -1,6 +1,8 @@
 # About
 This project is made to implement a simple solver that, given a formula $f$, finds all combinations of propositional variables that set $f$ to true.
 
+![image](assets/screenshot.png)
+
 # Inner workings
 A TL;DR for the logic is that, we enumarete all possible valuations of a formula and evaluates the given formula for each valuation. We then filter out those that evaluates to false.  
 This is an exponential operation, more sophisticated heuristics are planned to be implemented (I'm yet to learn them).
