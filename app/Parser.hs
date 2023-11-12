@@ -28,6 +28,9 @@ parens = between (symbol "(") (symbol ")")
 sepBy2 :: Parser a -> Parser b -> Parser [a]
 sepBy2 p sp = try $ (:) <$> p <* sp <*> sepBy1 p sp
 
+sepEndBy2 :: Parser a -> Parser b -> Parser [a]
+sepEndBy2 p sp = try $ (:) <$> p <* sp <*> sepEndBy1 p sp
+
 impliesSymbol = symbol "->" <|> symbol "=>"
 notSymbol = symbol "not" <|> symbol "~"
 andSymbol = symbol "and" <|> symbol "^"
@@ -55,8 +58,11 @@ pAnd = try (foldl1 And <$> sepBy2 pOr andSymbol) <|> pOr
 pImplies :: Parser Formula
 pImplies = try (Implies <$> pAnd <* impliesSymbol <*> pAnd) <|> pAnd
 
+pLineBreak :: Parser Formula
+pLineBreak = try (foldl1 And <$> sepEndBy2 pImplies eol) <|> pImplies
+
 pExpr :: Parser Formula
-pExpr = pImplies
+pExpr = pLineBreak
 
 pFormula :: Parser Formula
 pFormula = pExpr <* eof

@@ -5,6 +5,7 @@ import Test.QuickCheck
 import Text.Megaparsec
 
 import Data.Foldable (for_)
+import Data.List (intercalate)
 import Parser
 import Types
 
@@ -77,6 +78,38 @@ spec = describe
       $ validate
         [
           ( run "p v q v r and (p -> ~q) and (q -> ~r) and (r -> ~p)"
+          , Just
+              ( And
+                  ( And
+                      ( And
+                          (Or (Or (P (Prop "p")) (P (Prop "q"))) (P (Prop "r")))
+                          (Implies (P (Prop "p")) (Not (P (Prop "q"))))
+                      )
+                      (Implies (P (Prop "q")) (Not (P (Prop "r"))))
+                  )
+                  (Implies (P (Prop "r")) (Not (P (Prop "p"))))
+              )
+          )
+        ]
+    it "should handle linebreak"
+      $ validate
+        [
+          ( run
+              $ intercalate
+                "\n"
+                ["a", "b", "c"]
+          , Just (And (And (P (Prop "a")) (P (Prop "b"))) (P (Prop "c")))
+          )
+        ,
+          ( run
+              $ intercalate
+                "\n"
+                [ "p v q v r"
+                , "p -> (~q)"
+                , "q -> (~r)"
+                , "r -> (~p)"
+                , ""
+                ]
           , Just
               ( And
                   ( And
