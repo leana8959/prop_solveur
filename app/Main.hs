@@ -1,16 +1,16 @@
 module Main where
 
-import System.Environment
-import System.Exit
-import System.IO
+import           System.Environment
+import           System.Exit
+import           System.IO
 
-import System.Console.ANSI
-import Text.Pretty.Simple (pPrint)
+import           System.Console.ANSI
+import           Text.Pretty.Simple  (pPrint)
 
-import Parser
-import Solver
-import Text.Megaparsec (runParser)
-import Types
+import           Parser
+import           Solver
+import           Text.Megaparsec     (runParser)
+import           Types
 
 accentStyle = setSGR [SetColor Foreground Vivid Blue, SetConsoleIntensity BoldIntensity]
 decorStyle = setSGR [SetColor Foreground Dull Black, SetConsoleIntensity NormalIntensity]
@@ -74,4 +74,4 @@ main = do
   args <- getArgs
   case args of
     (flag : fname : _) | flag == "-f" -> fileMode fname
-    _ -> repl
+    _                                 -> repl

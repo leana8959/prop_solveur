@@ -1,11 +1,11 @@
 module Parser (pFormula) where
 
-import Data.Char
-import Data.Void
-import Text.Megaparsec
-import Text.Megaparsec.Char
+import           Data.Char
+import           Data.Void
+import           Text.Megaparsec
+import           Text.Megaparsec.Char
 import qualified Text.Megaparsec.Char.Lexer as L
-import Types
+import           Types
 
 type Input = String
 type Parser = Parsec Void Input
@@ -25,41 +25,29 @@ pIdent = lexeme (takeWhile1P Nothing isAlpha)
 parens :: Parser a -> Parser a
 parens = between (symbol "(") (symbol ")")
 
-sepBy2 :: Parser a -> Parser b -> Parser [a]
-sepBy2 p sp = try $ (:) <$> p <* sp <*> sepBy1 p sp
-
-sepEndBy2 :: Parser a -> Parser b -> Parser [a]
+sepBy2, sepEndBy2 :: Parser a -> Parser b -> Parser [a]
+sepBy2 p sp    = try $ (:) <$> p <* sp <*> sepBy1 p sp
 sepEndBy2 p sp = try $ (:) <$> p <* sp <*> sepEndBy1 p sp
 
-impliesSymbol = symbol "->" <|> symbol "=>"
-notSymbol = symbol "not" <|> symbol "~"
-andSymbol = symbol "and" <|> symbol "^"
-orSymbol = symbol "or" <|> symbol "v"
+impliesSymbol = symbol "->"  <|> symbol "=>"
+notSymbol     = symbol "not" <|> symbol "~"
+andSymbol     = symbol "and" <|> symbol "^"
+orSymbol      = symbol "or"  <|> symbol "v"
 
-pTop, pBot :: Parser Formula
-pTop = Top <$ symbol "top"
-pBot = Bottom <$ symbol "bot"
-
-pProp :: Parser Formula
+pTop, pBot, pProp :: Parser Formula
+pTop  = Top      <$  symbol "top"
+pBot  = Bottom   <$  symbol "bot"
 pProp = P . Prop <$> pIdent
 
 pSimple :: Parser Formula
-pSimple = parens pExpr <|> pTop <|> pBot <|> pProp
+pSimple = choice [parens pExpr, pTop, pBot, pProp]
 
-pNot :: Parser Formula
-pNot = try (Not <$ notSymbol <*> pSimple) <|> pSimple
-
-pOr :: Parser Formula
-pOr = try (foldl1 Or <$> sepBy2 pNot orSymbol) <|> pNot
-
-pAnd :: Parser Formula
-pAnd = try (foldl1 And <$> sepBy2 pOr andSymbol) <|> pOr
-
-pImplies :: Parser Formula
-pImplies = try (Implies <$> pAnd <* impliesSymbol <*> pAnd) <|> pAnd
-
-pLineBreak :: Parser Formula
-pLineBreak = try (foldl1 And <$> sepEndBy2 pImplies eol) <|> pImplies
+pNot, pOr, pAnd, pImplies, pLineBreak :: Parser Formula
+pNot       = (Not            <$  notSymbol <*> pSimple)          <|> pSimple
+pOr        = try (foldl1 Or  <$> sepBy2 pNot orSymbol)           <|> pNot
+pAnd       = try (foldl1 And <$> sepBy2 pOr andSymbol)           <|> pOr
+pImplies   = try (Implies    <$> pAnd <* impliesSymbol <*> pAnd) <|> pAnd
+pLineBreak = try (foldl1 And <$> sepEndBy2 pImplies eol)         <|> pImplies
 
 pExpr :: Parser Formula
 pExpr = pLineBreak

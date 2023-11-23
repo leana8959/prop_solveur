@@ -1,19 +1,19 @@
 module ParserSpec where
 
-import Test.Hspec
-import Test.QuickCheck
-import Text.Megaparsec
+import           Test.Hspec
+import           Test.QuickCheck
+import           Text.Megaparsec
 
-import Data.Foldable (for_)
-import Data.List (intercalate)
-import Parser
-import Types
+import           Data.Foldable   (for_)
+import           Data.List       (intercalate)
+import           Parser
+import           Types
 
 run :: String -> Maybe Formula
 run input =
   let output = runParser pFormula "" input
   in  case output of
-        Left err -> Nothing
+        Left err  -> Nothing
         Right res -> Just res
 
 validate xs = for_ xs (uncurry shouldBe)
