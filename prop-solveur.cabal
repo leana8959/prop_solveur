@@ -1,58 +1,51 @@
 cabal-version:      2.4
 name:               prop-solveur
 version:            0.1.0.0
-
--- A short (one-line) description of the package.
--- synopsis:
-
--- A longer description of the package.
--- description:
-
--- A URL where users can report bugs.
--- bug-reports:
-
--- The license under which the package is released.
--- license:
 author:             Léana 江
 maintainer:         leana.jiang@icloud.com
+extra-source-files: README.md
 
--- A copyright notice.
--- copyright:
--- category:
-extra-source-files: CHANGELOG.md
+library
+  hs-source-dirs:   src
+  default-language: Haskell2010
+  build-depends:
+    , ansi-terminal       >=0.11.5
+    , base                >=4.17
+    , containers          >=0.6
+    , megaparsec          >=9.3.1
+    , parser-combinators  >=1.3.0
+    , pretty-simple       >=4.1.2.0
+
+  exposed-modules:
+    Parser
+    Solver
+    Types
 
 executable prop-solveur
-  hs-source-dirs:   app
   default-language: Haskell2010
-  main-is:          Main.hs
-  other-modules:
-    Parser
-    Solver
-    Types
-
+  main-is:          src/Main.hs
   build-depends:
+    , ansi-terminal
     , base
     , containers
     , megaparsec
     , parser-combinators
-    , ansi-terminal
     , pretty-simple
+    , prop-solveur
 
 test-suite prop-solveur-spec
-  hs-source-dirs:   test app
   default-language: Haskell2010
   type:             exitcode-stdio-1.0
-  main-is:          Main.hs
-  other-modules:
-    Solver
-    Types
-    Parser
-    ParserSpec
-
+  hs-source-dirs:   test
+  main-is:          Spec.hs
+  other-modules:    ParserSpec
   build-depends:
+    , ansi-terminal
     , base
     , containers
+    , hspec               >=2.10.10
     , megaparsec
     , parser-combinators
-    , QuickCheck
-    , hspec
+    , pretty-simple
+    , prop-solveur
+    , QuickCheck          >=2.14.3

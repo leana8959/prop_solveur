@@ -8,13 +8,13 @@ A TL;DR for the logic is that, we enumarete all possible valuations of a formula
 This is an exponential operation, more sophisticated heuristics are planned to be implemented (I'm yet to learn them).
 
 # Execution
-1. Install `ghcup` with your favorite package manager, then install `cabal` with `ghcup`.
-2. Run `cabal run prop-solveur` to execute the program.
+1. Install `stack` with your favorite package manager.
+2. Run `stack run` to execute the program.
 
 # Read from file
-Use `cabal run prop-solveur -- -f [file_name]` to run with file as input.
+Use `stack run -- -f path/to/file` to run with file as input.
 
 # Installation
-If you want to use this tool anywhere, simply do `cabal install .`. Make sure that `$HOME/.cabal/bin` is in your `$PATH`.
+If you want to use this tool anywhere, simply do `stack install .`.
 
 Have fun :)
