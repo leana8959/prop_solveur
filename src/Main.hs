@@ -9,7 +9,7 @@ import           Text.Pretty.Simple  (pPrint)
 
 import           Parser
 import           Solver
-import           Text.Megaparsec     (runParser)
+import           Text.Megaparsec     (errorBundlePretty, runParser)
 import           Types
 
 accentStyle = setSGR [SetColor Foreground Vivid Blue, SetConsoleIntensity BoldIntensity]
@@ -52,7 +52,7 @@ repl = do
           putInfo "Parsed" "" <* pPrint res
           putInfo "Solutions" (showSolutions sol)
           putInfo ("There are " ++ show (length sol) ++ " solution(s)") ""
-        Left err -> putError "Failed to parse" (show err)
+        Left err -> putError "Failed to parse" (errorBundlePretty err)
       repl
 
 fileMode fname =
@@ -68,7 +68,7 @@ fileMode fname =
           putInfo "Solutions" (showSolutions sol)
           putInfo ("There are " ++ show (length sol) ++ " solution(s)") ""
           exitSuccess
-      Left err -> putError "Failed to parse" (show err)
+      Left err -> putError "Failed to parse" (errorBundlePretty err)
 
 main = do
   args <- getArgs
