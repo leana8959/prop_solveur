@@ -1,4 +1,4 @@
-module Main where
+module Main (main) where
 
 import           System.Environment
 import           System.Exit
@@ -10,7 +10,6 @@ import           Text.Pretty.Simple  (pPrint)
 import           Parser
 import           Solver
 import           Text.Megaparsec     (errorBundlePretty, runParser)
-import           Types
 
 accentStyle = setSGR [SetColor Foreground Vivid Blue, SetConsoleIntensity BoldIntensity]
 decorStyle = setSGR [SetColor Foreground Dull Black, SetConsoleIntensity NormalIntensity]
@@ -39,7 +38,7 @@ putError prompt text =
 
     putStrLn text
 
-repl = do
+doRepl = do
   putStrLn "Please enter a logical formula, :q to quit"
   line <- getLine
   case line of
@@ -53,9 +52,9 @@ repl = do
           putInfo "Solutions" (showSolutions sol)
           putInfo ("There are " ++ show (length sol) ++ " solution(s)") ""
         Left err -> putError "Failed to parse" (errorBundlePretty err)
-      repl
+      doRepl
 
-fileMode fname =
+doFile fname =
   do
     handle <- openFile fname ReadMode
     content <- hGetContents handle
@@ -73,5 +72,5 @@ fileMode fname =
 main = do
   args <- getArgs
   case args of
-    (flag : fname : _) | flag == "-f" -> fileMode fname
-    _                                 -> repl
+    (flag : fname : _) | flag == "-f" -> doFile fname
+    _                                 -> doRepl

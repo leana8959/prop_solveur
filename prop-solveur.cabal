@@ -21,6 +21,17 @@ library
     Solver
     Types
 
+  ghc-options:
+    -Wall
+    -Wcompat
+    -Widentities
+    -Wincomplete-record-updates
+    -Wincomplete-patterns
+    -Wincomplete-uni-patterns
+    -Wredundant-constraints
+    -fwarn-unused-imports
+    -fwarn-name-shadowing
+
 executable prop-solveur
   default-language: Haskell2010
   main-is:          src/Main.hs
@@ -32,6 +43,18 @@ executable prop-solveur
     , parser-combinators
     , pretty-simple
     , prop-solveur
+
+  ghc-options:
+    -Wall
+    -Wcompat
+    -Widentities
+    -Wincomplete-record-updates
+    -Wincomplete-patterns
+    -Wincomplete-uni-patterns
+    -Wredundant-constraints
+    -fwarn-unused-imports
+    -fwarn-name-shadowing
+
 
 test-suite prop-solveur-spec
   default-language: Haskell2010
