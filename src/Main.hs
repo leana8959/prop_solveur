@@ -11,11 +11,13 @@ import           Parser
 import           Solver
 import           Text.Megaparsec     (errorBundlePretty, runParser)
 
+accentStyle, decorStyle, errorStyle, resetStyle :: IO ()
 accentStyle = setSGR [SetColor Foreground Vivid Blue, SetConsoleIntensity BoldIntensity]
 decorStyle = setSGR [SetColor Foreground Dull Black, SetConsoleIntensity NormalIntensity]
 errorStyle = setSGR [SetColor Foreground Vivid Red, SetConsoleIntensity BoldIntensity]
 resetStyle = setSGR [Reset]
 
+putInfo :: String -> String -> IO ()
 putInfo prompt text =
   do
     let w = ((80 - length prompt) `div` 2) - 2
@@ -27,6 +29,7 @@ putInfo prompt text =
 
     putStrLn text
 
+putError :: String -> String -> IO ()
 putError prompt text =
   do
     let w = ((80 - length prompt) `div` 2) - 2
@@ -38,6 +41,7 @@ putError prompt text =
 
     putStrLn text
 
+doRepl :: IO ()
 doRepl = do
   putStrLn "Please enter a logical formula, :q to quit"
   line <- getLine
@@ -54,6 +58,7 @@ doRepl = do
         Left err -> putError "Failed to parse" (errorBundlePretty err)
       doRepl
 
+doFile :: FilePath -> IO ()
 doFile fname =
   do
     handle <- openFile fname ReadMode
@@ -69,6 +74,7 @@ doFile fname =
           exitSuccess
       Left err -> putError "Failed to parse" (errorBundlePretty err)
 
+main :: IO ()
 main = do
   args <- getArgs
   case args of
