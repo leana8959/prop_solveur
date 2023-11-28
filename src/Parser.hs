@@ -1,23 +1,25 @@
 module Parser (pFormula) where
 
+import           Control.Monad
+
 import           Data.Char
 import           Data.Void
 import           Text.Megaparsec
 import           Text.Megaparsec.Char
-import qualified Text.Megaparsec.Char.Lexer as L
+
 import           Types
 
 type Input = String
 type Parser = Parsec Void Input
 
 sc :: Parser ()
-sc = L.space hspace1 empty empty
+sc = void (many hspace1)
 
 lexeme :: Parser a -> Parser a
-lexeme = L.lexeme sc
+lexeme p = p <* sc
 
 symbol :: String -> Parser String
-symbol = L.symbol sc
+symbol s = string s <* sc
 
 pIdent :: Parser String
 pIdent = lexeme (takeWhile1P Nothing isAlpha)
