@@ -109,3 +109,28 @@ spec = describe
               (Implies (P (Prop "r")) (Not (P (Prop "p"))))
           )
         ]
+    it "should not halt where multiple empty lines are present"
+      $ validate
+        [
+          ( unlines
+              [ "p v q v r"
+              , ""
+              , "p -> (~q)"
+              , ""
+              , ""
+              , ""
+              , "q -> (~r)"
+              , "r -> (~p)"
+              , ""
+              ]
+          , And
+              ( And
+                  ( And
+                      (Or (Or (P (Prop "p")) (P (Prop "q"))) (P (Prop "r")))
+                      (Implies (P (Prop "p")) (Not (P (Prop "q"))))
+                  )
+                  (Implies (P (Prop "q")) (Not (P (Prop "r"))))
+              )
+              (Implies (P (Prop "r")) (Not (P (Prop "p"))))
+          )
+        ]

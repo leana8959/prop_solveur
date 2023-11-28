@@ -48,7 +48,7 @@ pNot       = (Not            <$  notSymbol <*> pSimple)          <|> pSimple
 pOr        = try (foldl1 Or  <$> sepBy2 pNot orSymbol)           <|> pNot
 pAnd       = try (foldl1 And <$> sepBy2 pOr andSymbol)           <|> pOr
 pImplies   = try (Implies    <$> pAnd <* impliesSymbol <*> pAnd) <|> pAnd
-pLineBreak = try (foldl1 And <$> sepEndBy2 pImplies eol)         <|> pImplies
+pLineBreak = try (foldl1 And <$> sepEndBy2 pImplies (some eol))  <|> pImplies
 
 pExpr :: Parser Formula
 pExpr = pLineBreak
