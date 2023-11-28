@@ -13,6 +13,6 @@ data Formula
   | And Formula Formula
   | Or Formula Formula
   | Implies Formula Formula
-  deriving (Show, Eq, Ord)
+  deriving (Show)
 
 type Valuation = M.Map Proposition Bool
