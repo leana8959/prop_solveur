@@ -29,6 +29,7 @@ sepBy2, sepEndBy2 :: Parser a -> Parser b -> Parser [a]
 sepBy2 p sp    = try $ (:) <$> p <* sp <*> sepBy1 p sp
 sepEndBy2 p sp = try $ (:) <$> p <* sp <*> sepEndBy1 p sp
 
+impliesSymbol, notSymbol, andSymbol, orSymbol :: Parser String
 impliesSymbol = symbol "->"  <|> symbol "=>"
 notSymbol     = symbol "not" <|> symbol "~"
 andSymbol     = symbol "and" <|> symbol "^"
