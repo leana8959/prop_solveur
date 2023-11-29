@@ -11,7 +11,7 @@ import           Types
 
 import           Test.Hspec.Megaparsec
 
-validate xs = for_ xs (\(input, expect) -> parse pFormula "" input `shouldParse` expect)
+validate = mapM_ (\(input, expect) -> parse pFormula "" input `shouldParse` expect)
 
 spec :: Spec
 spec = describe

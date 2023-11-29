@@ -13,7 +13,7 @@ type Input = String
 type Parser = Parsec Void Input
 
 sc :: Parser ()
-sc = void (many hspace1)
+sc = skipMany hspace1
 
 lexeme :: Parser a -> Parser a
 lexeme p = p <* sc
@@ -22,7 +22,7 @@ symbol :: String -> Parser String
 symbol s = string s <* sc
 
 pIdent :: Parser String
-pIdent = lexeme (takeWhile1P Nothing isAlpha)
+pIdent = lexeme (takeWhile1P (Just "variable name") isAlpha)
 
 parens :: Parser a -> Parser a
 parens = between (symbol "(") (symbol ")")
@@ -47,10 +47,10 @@ pSimple = choice [parens pExpr, pTop, pBot, pProp]
 
 pNot, pOr, pAnd, pImplies, pLineBreak :: Parser Formula
 pNot       = (Not            <$  notSymbol <*> pSimple)          <|> pSimple
-pOr        = try (foldl1 Or  <$> sepBy2 pNot orSymbol)           <|> pNot
-pAnd       = try (foldl1 And <$> sepBy2 pOr andSymbol)           <|> pOr
+pOr        = try (foldl1 Or  <$> pNot `sepBy2` orSymbol)         <|> pNot
+pAnd       = try (foldl1 And <$> pOr `sepBy2` andSymbol)         <|> pOr
 pImplies   = try (Implies    <$> pAnd <* impliesSymbol <*> pAnd) <|> pAnd
-pLineBreak = try (foldl1 And <$> sepEndBy2 pImplies (some eol))  <|> pImplies
+pLineBreak = try (foldl1 And <$> pImplies `sepEndBy2` some eol)  <|> pImplies
 
 pExpr :: Parser Formula
 pExpr = pLineBreak
