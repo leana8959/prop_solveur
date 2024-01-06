@@ -1,7 +1,5 @@
 module Parser (pFormula) where
 
-import           Control.Monad
-
 import           Data.Char
 import           Data.Void
 import           Text.Megaparsec
@@ -28,8 +26,8 @@ parens :: Parser a -> Parser a
 parens = between (symbol "(") (symbol ")")
 
 sepBy2, sepEndBy2 :: Parser a -> Parser b -> Parser [a]
-sepBy2 p sp    = try $ (:) <$> p <* sp <*> sepBy1 p sp
-sepEndBy2 p sp = try $ (:) <$> p <* sp <*> sepEndBy1 p sp
+sepBy2 p sp    = try $ (:) <$> p <* sp <*> p `sepBy1` sp
+sepEndBy2 p sp = try $ (:) <$> p <* sp <*> p `sepEndBy1` sp
 
 impliesSymbol, notSymbol, andSymbol, orSymbol :: Parser String
 impliesSymbol = symbol "->"  <|> symbol "=>"

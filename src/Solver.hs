@@ -1,6 +1,5 @@
 module Solver where
 
-import           Data.Foldable
 import qualified Data.Map.Strict as M
 import qualified Data.Set        as S
 import           Types
