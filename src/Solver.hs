@@ -8,11 +8,10 @@ import           Types
 -- | Générer toutes les valuations possible (ensemble `Val`)
 gen :: [Proposition] -> [Valuation]
 gen ps =
-  let l      = length ps
-      perm 0 = []
-      perm 1 = [[True], [False]]
-      perm n = [p : t | p <- [True, False], t <- perm (n - 1)]
-  in  map (M.fromList . zip ps) (perm l)
+  let l       = length ps
+      bools 0 = [[]]
+      bools n = [p : t | p <- [True, False], t <- bools (n - 1)]
+  in  map (M.fromList . zip ps) (bools l)
 
 -- | Trouver toutes les propositions
 findProp :: Formula -> [Proposition]
