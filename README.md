@@ -1,7 +1,7 @@
 # About
 This project is made to implement a simple solver that, given a formula $f$, finds all combinations of propositional variables that set $f$ to true.
 
-![image](assets/screenshot.png)
+[![asciicast](https://asciinema.org/a/hTHDs2pJwd5LnlAoPejW3qPnI.svg)](https://asciinema.org/a/hTHDs2pJwd5LnlAoPejW3qPnI)
 
 # Inner workings
 A TL;DR for the logic is that, we enumarete all possible valuations of a formula and evaluates the given formula for each valuation. We then filter out those that evaluates to false.  
