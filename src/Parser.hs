@@ -36,9 +36,9 @@ andSymbol     = symbol "and" <|> symbol "^"
 orSymbol      = symbol "or"  <|> symbol "v"
 
 pTop, pBot, pProp :: Parser Formula
-pTop  = Top      <$  symbol "top"
-pBot  = Bottom   <$  symbol "bot"
-pProp = P . Prop <$> pIdent
+pTop  = Top    <$  symbol "top"
+pBot  = Bottom <$  symbol "bot"
+pProp = Prop      <$> pIdent
 
 pSimple :: Parser Formula
 pSimple = choice [parens pExpr, pTop, pBot, pProp]
