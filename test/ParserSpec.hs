@@ -1,15 +1,15 @@
 module ParserSpec where
 
-import           Test.Hspec
-import           Test.QuickCheck
-import           Text.Megaparsec
+import Test.Hspec
+import Test.QuickCheck
+import Text.Megaparsec
 
-import           Data.Foldable         (for_)
-import           Data.List             (intercalate)
-import           Parser
-import           Types
+import Data.Foldable (for_)
+import Data.List (intercalate)
+import Parser
+import Types
 
-import           Test.Hspec.Megaparsec
+import Test.Hspec.Megaparsec
 
 validate = mapM_ (\(input, expect) -> parse pFormula "" input `shouldParse` expect)
 
@@ -19,54 +19,54 @@ spec = describe
   $ do
     it "should parse implies"
       $ validate
-        [ ("a -> b", Implies (P (Prop "a")) (P (Prop "b")))
-        , ("a => b", Implies (P (Prop "a")) (P (Prop "b")))
+        [ ("a -> b", Implies (Prop "a") (Prop "b"))
+        , ("a => b", Implies (Prop "a") (Prop "b"))
         ]
     it "should parse and"
       $ validate
-        [ ("a and b", And (P (Prop "a")) (P (Prop "b")))
-        , ("a ^ b", And (P (Prop "a")) (P (Prop "b")))
+        [ ("a and b", And (Prop "a") (Prop "b"))
+        , ("a ^ b", And (Prop "a") (Prop "b"))
         ]
     it "should parse or"
       $ validate
-        [ ("a or b", Or (P (Prop "a")) (P (Prop "b")))
-        , ("a v b", Or (P (Prop "a")) (P (Prop "b")))
+        [ ("a or b", Or (Prop "a") (Prop "b"))
+        , ("a v b", Or (Prop "a") (Prop "b"))
         ]
     it "should respect precedence and parentheses"
       $ validate
         [
           ( "a or (b and c)"
-          , Or (P (Prop "a")) (And (P (Prop "b")) (P (Prop "c")))
+          , Or (Prop "a") (And (Prop "b") (Prop "c"))
           )
         ,
           ( "a or b and c"
-          , And (Or (P (Prop "a")) (P (Prop "b"))) (P (Prop "c"))
+          , And (Or (Prop "a") (Prop "b")) (Prop "c")
           )
         ,
           ( "a and (b or c)"
-          , And (P (Prop "a")) (Or (P (Prop "b")) (P (Prop "c")))
+          , And (Prop "a") (Or (Prop "b") (Prop "c"))
           )
         ,
           ( "a and b or c"
-          , And (P (Prop "a")) (Or (P (Prop "b")) (P (Prop "c")))
+          , And (Prop "a") (Or (Prop "b") (Prop "c"))
           )
         ,
           ( "(a and b) or c"
-          , Or (And (P (Prop "a")) (P (Prop "b"))) (P (Prop "c"))
+          , Or (And (Prop "a") (Prop "b")) (Prop "c")
           )
         ]
     it "and should be associative"
       $ validate
         [
           ( "a and b and c"
-          , And (And (P (Prop "a")) (P (Prop "b"))) (P (Prop "c"))
+          , And (And (Prop "a") (Prop "b")) (Prop "c")
           )
         ]
     it "or should be associative"
       $ validate
         [
           ( "a or b or c"
-          , Or (Or (P (Prop "a")) (P (Prop "b"))) (P (Prop "c"))
+          , Or (Or (Prop "a") (Prop "b")) (Prop "c")
           )
         ]
     it "should pass more tests hehe"
@@ -76,19 +76,19 @@ spec = describe
           , And
               ( And
                   ( And
-                      (Or (Or (P (Prop "p")) (P (Prop "q"))) (P (Prop "r")))
-                      (Implies (P (Prop "p")) (Not (P (Prop "q"))))
+                      (Or (Or (Prop "p") (Prop "q")) (Prop "r"))
+                      (Implies (Prop "p") (Not (Prop "q")))
                   )
-                  (Implies (P (Prop "q")) (Not (P (Prop "r"))))
+                  (Implies (Prop "q") (Not (Prop "r")))
               )
-              (Implies (P (Prop "r")) (Not (P (Prop "p"))))
+              (Implies (Prop "r") (Not (Prop "p")))
           )
         ]
     it "should handle linebreak"
       $ validate
         [
           ( unlines ["a", "b", "c"]
-          , And (And (P (Prop "a")) (P (Prop "b"))) (P (Prop "c"))
+          , And (And (Prop "a") (Prop "b")) (Prop "c")
           )
         ,
           ( unlines
@@ -101,12 +101,12 @@ spec = describe
           , And
               ( And
                   ( And
-                      (Or (Or (P (Prop "p")) (P (Prop "q"))) (P (Prop "r")))
-                      (Implies (P (Prop "p")) (Not (P (Prop "q"))))
+                      (Or (Or (Prop "p") (Prop "q")) (Prop "r"))
+                      (Implies (Prop "p") (Not (Prop "q")))
                   )
-                  (Implies (P (Prop "q")) (Not (P (Prop "r"))))
+                  (Implies (Prop "q") (Not (Prop "r")))
               )
-              (Implies (P (Prop "r")) (Not (P (Prop "p"))))
+              (Implies (Prop "r") (Not (Prop "p")))
           )
         ]
     it "should not halt where multiple empty lines are present"
@@ -126,11 +126,11 @@ spec = describe
           , And
               ( And
                   ( And
-                      (Or (Or (P (Prop "p")) (P (Prop "q"))) (P (Prop "r")))
-                      (Implies (P (Prop "p")) (Not (P (Prop "q"))))
+                      (Or (Or (Prop "p") (Prop "q")) (Prop "r"))
+                      (Implies (Prop "p") (Not (Prop "q")))
                   )
-                  (Implies (P (Prop "q")) (Not (P (Prop "r"))))
+                  (Implies (Prop "q") (Not (Prop "r")))
               )
-              (Implies (P (Prop "r")) (Not (P (Prop "p"))))
+              (Implies (Prop "r") (Not (Prop "p")))
           )
         ]
