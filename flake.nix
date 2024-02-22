@@ -49,6 +49,8 @@
         '';
       };
     in {
+      packages.default = pkgs.haskellPackages.callCabal2nix "prop-solveur" ./. {};
+
       devShells.default = pkgs.mkShell {
         buildInputs = devTools;
 
