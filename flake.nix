@@ -27,6 +27,7 @@
         hPkgs.hoogle # Lookup Haskell documentation
         hPkgs.haskell-language-server # LSP server for editor
         hPkgs.cabal-install
+        hPkgs.cabal-fmt
       ];
 
       # Wrap Stack to work with our Nix integration. We don't want to modify
