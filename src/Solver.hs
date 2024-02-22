@@ -4,6 +4,10 @@ import qualified Data.Map.Strict as M
 import qualified Data.Set as S
 import Types
 
+import Data.Bifunctor (Bifunctor(first))
+import qualified Data.Text as T
+
+
 -- | Générer toutes les valuations possible (ensemble `Val`)
 gen :: [Ident] -> [Valuation]
 gen ps =
@@ -44,9 +48,10 @@ solve f =
   in  ts
 
 showSolution :: Valuation -> Int -> String
-showSolution v i = unlines $
-  ("solution nº" ++ show i) :
-    map (\(p, value) -> p ++ ": " ++ show value) (M.toList v)
+showSolution v i =
+  unlines
+  $ ("solution nº" ++ show i)
+    : map ((\(p, value) -> p ++ ": " ++ show value) . first T.unpack) (M.toList v)
 
 showSolutions :: [Valuation] -> String
 showSolutions vs = unlines $ uncurry showSolution <$> zip vs [1..]

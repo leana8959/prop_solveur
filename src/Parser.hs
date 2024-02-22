@@ -5,9 +5,11 @@ import Data.Void
 import Text.Megaparsec
 import Text.Megaparsec.Char
 
+import Data.Text (Text)
+
 import Types
 
-type Input = String
+type Input = Text
 type Parser = Parsec Void Input
 
 sc :: Parser ()
@@ -16,10 +18,10 @@ sc = skipMany hspace1
 lexeme :: Parser a -> Parser a
 lexeme p = p <* sc
 
-symbol :: String -> Parser String
+symbol :: Text -> Parser Text
 symbol s = string s <* sc
 
-pIdent :: Parser String
+pIdent :: Parser Text
 pIdent = lexeme (takeWhile1P (Just "variable name") isAlpha)
 
 parens :: Parser a -> Parser a
@@ -29,7 +31,7 @@ sepBy2, sepEndBy2 :: Parser a -> Parser b -> Parser [a]
 sepBy2 p sp    = try $ (:) <$> p <* sp <*> p `sepBy1` sp
 sepEndBy2 p sp = try $ (:) <$> p <* sp <*> p `sepEndBy1` sp
 
-impliesSymbol, notSymbol, andSymbol, orSymbol :: Parser String
+impliesSymbol, notSymbol, andSymbol, orSymbol :: Parser Text
 impliesSymbol = symbol "->"  <|> symbol "=>"
 notSymbol     = symbol "not" <|> symbol "~"
 andSymbol     = symbol "and" <|> symbol "^"

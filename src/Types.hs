@@ -2,7 +2,10 @@ module Types where
 
 import qualified Data.Map.Strict as M
 
-type Ident = String
+import Data.Text (Text)
+
+type Ident = Text
+type Valuation = M.Map Ident Bool
 
 data Formula
   = Bottom
@@ -14,4 +17,3 @@ data Formula
   | Implies Formula Formula
   deriving (Show, Eq)
 
-type Valuation = M.Map Ident Bool

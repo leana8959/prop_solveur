@@ -11,68 +11,64 @@ import Parser
 import Solver
 import Text.Megaparsec (errorBundlePretty, runParser)
 
-accentStyle, decorStyle, errorStyle, resetStyle :: IO ()
-accentStyle = setSGR [SetColor Foreground Vivid Blue, SetConsoleIntensity BoldIntensity]
-decorStyle = setSGR [SetColor Foreground Dull Black, SetConsoleIntensity NormalIntensity]
-errorStyle = setSGR [SetColor Foreground Vivid Red, SetConsoleIntensity BoldIntensity]
-resetStyle = setSGR [Reset]
+import Data.Text (Text)
+import qualified Data.Text as T
+import qualified Data.Text.IO as TIO
 
-putInfo :: String -> String -> IO ()
-putInfo prompt text =
-  do
-    let w = ((80 - length prompt) `div` 2) - 2
-    let line = replicate w '='
+accentStyle, decorStyle, errorStyle, resetStyle :: [SGR]
+accentStyle = [SetColor Foreground Vivid Blue, SetConsoleIntensity BoldIntensity]
+decorStyle  = [SetColor Foreground Dull Black, SetConsoleIntensity NormalIntensity]
+errorStyle  = [SetColor Foreground Vivid Red, SetConsoleIntensity BoldIntensity]
+resetStyle  = [Reset]
 
-    decorStyle <* putStr (line ++ " ") <* resetStyle
-    accentStyle <* putStr prompt <* resetStyle
-    decorStyle <* putStr (" " ++ line) <* resetStyle <* putStrLn ""
+putWithStyle :: [SGR] -> IO () -> IO ()
+putWithStyle st io = setSGR st <* io <* setSGR resetStyle
 
-    putStrLn text
+putWithBorder :: [SGR] -> String -> String -> IO ()
+putWithBorder st prompt text = do
+  let w = ((80 - length prompt) `div` 2) - 2
+      line = replicate w '='
+  putWithStyle decorStyle $ putStr (line ++ " ")
+  putWithStyle st $ putStr prompt
+  putWithStyle decorStyle $ putStrLn (" " ++ line)
+  putStrLn text
 
-putError :: String -> String -> IO ()
-putError prompt text =
-  do
-    let w = ((80 - length prompt) `div` 2) - 2
-    let line = replicate w '='
-
-    decorStyle <* putStr (line ++ " ") <* resetStyle
-    errorStyle <* putStr prompt <* resetStyle
-    decorStyle <* putStr (" " ++ line) <* resetStyle <* putStrLn ""
-
-    putStrLn text
+say, scream :: String -> String -> IO ()
+say = putWithBorder accentStyle
+scream = putWithBorder errorStyle
 
 doRepl :: IO ()
 doRepl = do
   putStrLn "Please enter a logical formula, :q to quit"
-  line <- getLine
+  line <- TIO.getLine
   case line of
     ":q" -> exitSuccess
     _ -> do
       case runParser pFormula "stdin" line of
         Right res -> do
           let sol = solve res
-          putInfo "You entered" line
-          putInfo "Parsed" "" <* pPrint res
-          putInfo "Solutions" (showSolutions sol)
-          putInfo ("There are " ++ show (length sol) ++ " solution(s)") ""
-        Left err -> putError "Failed to parse" (errorBundlePretty err)
+          say "You entered" (T.unpack line)
+          say "Parsed" "" <* pPrint res
+          say "Solutions" (showSolutions sol)
+          say ("There are " ++ show (length sol) ++ " solution(s)") ""
+        Left err -> scream "Failed to parse" (errorBundlePretty err)
       doRepl
 
 doFile :: FilePath -> IO ()
 doFile fname =
   do
     handle <- openFile fname ReadMode
-    content <- hGetContents handle
+    content <- TIO.hGetContents handle
     case runParser pFormula "file" content of
       Right res ->
         do
           let sol = solve res
-          putInfo "File contains" content
-          putInfo "Parsed" "" <* pPrint res
-          putInfo "Solutions" (showSolutions sol)
-          putInfo ("There are " ++ show (length sol) ++ " solution(s)") ""
+          say "File contains" (T.unpack content)
+          say "Parsed" "" <* pPrint res
+          say "Solutions" (showSolutions sol)
+          say ("There are " ++ show (length sol) ++ " solution(s)") ""
           exitSuccess
-      Left err -> putError "Failed to parse" (errorBundlePretty err)
+      Left err -> scream "Failed to parse" (errorBundlePretty err)
 
 main :: IO ()
 main = do
