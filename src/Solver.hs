@@ -1,8 +1,8 @@
 module Solver where
 
 import qualified Data.Map.Strict as M
-import qualified Data.Set        as S
-import           Types
+import qualified Data.Set as S
+import Types
 
 -- | Générer toutes les valuations possible (ensemble `Val`)
 gen :: [Ident] -> [Valuation]

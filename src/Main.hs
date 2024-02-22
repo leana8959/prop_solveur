@@ -1,15 +1,15 @@
 module Main (main) where
 
-import           System.Environment
-import           System.Exit
-import           System.IO
+import System.Environment
+import System.Exit
+import System.IO
 
-import           System.Console.ANSI
-import           Text.Pretty.Simple  (pPrint)
+import System.Console.ANSI
+import Text.Pretty.Simple (pPrint)
 
-import           Parser
-import           Solver
-import           Text.Megaparsec     (errorBundlePretty, runParser)
+import Parser
+import Solver
+import Text.Megaparsec (errorBundlePretty, runParser)
 
 accentStyle, decorStyle, errorStyle, resetStyle :: IO ()
 accentStyle = setSGR [SetColor Foreground Vivid Blue, SetConsoleIntensity BoldIntensity]

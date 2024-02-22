@@ -1,11 +1,11 @@
 module Parser (pFormula) where
 
-import           Data.Char
-import           Data.Void
-import           Text.Megaparsec
-import           Text.Megaparsec.Char
+import Data.Char
+import Data.Void
+import Text.Megaparsec
+import Text.Megaparsec.Char
 
-import           Types
+import Types
 
 type Input = String
 type Parser = Parsec Void Input
