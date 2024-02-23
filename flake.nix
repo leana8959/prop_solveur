@@ -48,10 +48,10 @@
             "
         '';
       };
-    in {
+    in rec {
       packages.default = pkgs.haskellPackages.callCabal2nix "prop-solveur" ./. {};
 
-      devShells.default = pkgs.mkShell {
+      devShells.default = packages.default.env.overrideAttrs {
         buildInputs = devTools;
 
         # Make external Nix c libraries like zlib known to GHC, like pkgs.haskell.lib.buildStackProject does
