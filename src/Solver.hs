@@ -5,7 +5,7 @@ import qualified Data.Map.Strict as M
 import qualified Data.Set as S
 import qualified Data.Text as T
 
-import Types
+import Types (Formula(..), Ident, Valuation)
 
 -- | Générer toutes les valuations possible (ensemble `Val`)
 gen :: [Ident] -> [Valuation]

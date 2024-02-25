@@ -1,12 +1,14 @@
 module Parser (pFormula) where
 
-import Data.Char
+import Data.Char (isAlpha)
 import Data.Text (Text)
-import Data.Void
+import Data.Void (Void)
 import Text.Megaparsec
-import Text.Megaparsec.Char
+  (MonadParsec(eof, takeWhile1P, try), Parsec, between, choice, sepBy1,
+  sepEndBy1, skipMany, some, (<|>))
+import Text.Megaparsec.Char (eol, hspace1, string)
 
-import Types
+import Types (Formula(..))
 
 type Input = Text
 type Parser = Parsec Void Input

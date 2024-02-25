@@ -5,12 +5,15 @@ import Data.Bifunctor (Bifunctor(bimap))
 import qualified Data.Text as T
 import qualified Data.Text.IO as TIO
 import System.Console.ANSI
-import System.Environment
-import System.IO
+  (Color(Black, Blue, Red), ColorIntensity(Dull, Vivid),
+  ConsoleIntensity(BoldIntensity, NormalIntensity), ConsoleLayer(Foreground),
+  SGR(Reset, SetColor, SetConsoleIntensity), setSGR)
+import System.Environment (getArgs)
+import System.IO (IOMode(ReadMode), openFile)
 import Text.Pretty.Simple (pPrint)
 
-import Parser
-import Solver
+import Parser (pFormula)
+import Solver (showSolutions, solve)
 import Text.Megaparsec (errorBundlePretty, runParser)
 
 accentStyle, decorStyle, errorStyle, resetStyle :: [SGR]
