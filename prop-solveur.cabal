@@ -23,6 +23,7 @@ common common
 
   default-extensions:
     OverloadedStrings
+    TupleSections
 
 library
   import:          common

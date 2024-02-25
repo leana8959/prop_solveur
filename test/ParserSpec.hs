@@ -1,15 +1,13 @@
 module ParserSpec where
 
+import qualified Data.Text as T (unlines)
 import Test.Hspec
-import Test.QuickCheck
+import Test.Hspec.Megaparsec
 import Text.Megaparsec
 
-import Data.Foldable (for_)
-import Data.List (intercalate)
 import Parser
 import Types
 
-import Test.Hspec.Megaparsec
 
 validate = mapM_ (\(input, expect) -> parse pFormula "" input `shouldParse` expect)
 
@@ -87,11 +85,11 @@ spec = describe
     it "should handle linebreak"
       $ validate
         [
-          ( unlines ["a", "b", "c"]
+          ( T.unlines ["a", "b", "c"]
           , And (And (Prop "a") (Prop "b")) (Prop "c")
           )
         ,
-          ( unlines
+          ( T.unlines
               [ "p v q v r"
               , "p -> (~q)"
               , "q -> (~r)"
@@ -112,7 +110,7 @@ spec = describe
     it "should not halt where multiple empty lines are present"
       $ validate
         [
-          ( unlines
+          ( T.unlines
               [ "p v q v r"
               , ""
               , "p -> (~q)"

@@ -1,19 +1,17 @@
 module Main (main) where
 
-import System.Environment
-import System.Exit
-import System.IO
-
+import Control.Monad (when)
+import Data.Bifunctor (Bifunctor(bimap))
+import qualified Data.Text as T
+import qualified Data.Text.IO as TIO
 import System.Console.ANSI
+import System.Environment
+import System.IO
 import Text.Pretty.Simple (pPrint)
 
 import Parser
 import Solver
 import Text.Megaparsec (errorBundlePretty, runParser)
-
-import Data.Text (Text)
-import qualified Data.Text as T
-import qualified Data.Text.IO as TIO
 
 accentStyle, decorStyle, errorStyle, resetStyle :: [SGR]
 accentStyle = [SetColor Foreground Vivid Blue, SetConsoleIntensity BoldIntensity]
@@ -37,42 +35,31 @@ say, scream :: String -> String -> IO ()
 say = putWithBorder accentStyle
 scream = putWithBorder errorStyle
 
-doRepl :: IO ()
-doRepl = do
-  putStrLn "Please enter a logical formula, :q to quit"
-  line <- TIO.getLine
-  case line of
-    ":q" -> exitSuccess
-    _ -> do
-      case runParser pFormula "stdin" line of
-        Right res -> do
-          let sol = solve res
-          say "You entered" (T.unpack line)
-          say "Parsed" "" <* pPrint res
-          say "Solutions" (showSolutions sol)
-          say ("There are " ++ show (length sol) ++ " solution(s)") ""
-        Left err -> scream "Failed to parse" (errorBundlePretty err)
-      doRepl
-
-doFile :: FilePath -> IO ()
-doFile fname =
-  do
-    handle <- openFile fname ReadMode
-    content <- TIO.hGetContents handle
-    case runParser pFormula "file" content of
-      Right res ->
-        do
-          let sol = solve res
-          say "File contains" (T.unpack content)
-          say "Parsed" "" <* pPrint res
-          say "Solutions" (showSolutions sol)
-          say ("There are " ++ show (length sol) ++ " solution(s)") ""
-          exitSuccess
-      Left err -> scream "Failed to parse" (errorBundlePretty err)
-
 main :: IO ()
 main = do
   args <- getArgs
-  case args of
-    (flag : fname : _) | flag == "-f" -> doFile fname
-    _                                 -> doRepl
+  (content, isRepl) <- case args of
+    (flag : _) | flag == "-" ->
+      (, False) <$> TIO.getContents
+    (flag : fname : _)
+      | flag == "-f" -> do
+        handle <- openFile fname ReadMode
+        (, False) <$> TIO.hGetContents handle
+    _ -> do
+      putStrLn "Please enter a logical formula, :q to quit"
+      (, True) <$> TIO.getLine
+
+  say "File contains" (T.unpack content)
+
+  let output = bimap errorBundlePretty solve
+             . runParser pFormula (if isRepl then "repl" else "file")
+             $ content
+
+  case output of
+    Right ast -> do
+      say "Parsed" "" <* pPrint ast
+      say "Solutions" (showSolutions ast)
+      say ("There are " ++ show (length ast) ++ " solution(s)") ""
+    Left err -> scream "Failed to parse" err
+
+  when isRepl main

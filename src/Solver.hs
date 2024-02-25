@@ -1,12 +1,11 @@
 module Solver where
 
+import Data.Bifunctor (Bifunctor(first))
 import qualified Data.Map.Strict as M
 import qualified Data.Set as S
-import Types
-
-import Data.Bifunctor (Bifunctor(first))
 import qualified Data.Text as T
 
+import Types
 
 -- | Générer toutes les valuations possible (ensemble `Val`)
 gen :: [Ident] -> [Valuation]
