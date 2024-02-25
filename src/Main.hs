@@ -1,7 +1,7 @@
 module Main (main) where
 
 import Control.Monad (when)
-import Data.Bifunctor (Bifunctor(bimap))
+import Data.Bifunctor (Bifunctor(bimap, first))
 import qualified Data.Text as T
 import qualified Data.Text.IO as TIO
 import System.Console.ANSI
@@ -27,7 +27,7 @@ putWithStyle st io = setSGR st <* io <* setSGR resetStyle
 
 putWithBorder :: [SGR] -> String -> String -> IO ()
 putWithBorder st prompt text = do
-  let w = ((80 - length prompt) `div` 2) - 2
+  let w    = ((80 - length prompt) `div` 2) - 2
       line = replicate w '='
   putWithStyle decorStyle $ putStr (line ++ " ")
   putWithStyle st $ putStr prompt
@@ -54,15 +54,16 @@ main = do
 
   say "File contains" (T.unpack content)
 
-  let output = bimap errorBundlePretty solve
+  let output = first errorBundlePretty
              . runParser pFormula (if isRepl then "repl" else "file")
              $ content
 
   case output of
     Right ast -> do
+      let sols = solve ast
       say "Parsed" "" <* pPrint ast
-      say "Solutions" (showSolutions ast)
-      say ("There are " ++ show (length ast) ++ " solution(s)") ""
+      say "Solutions" (showSolutions sols)
+      say ("There are " ++ show (length sols) ++ " solution(s)") ""
     Left err -> scream "Failed to parse" err
 
   when isRepl main
