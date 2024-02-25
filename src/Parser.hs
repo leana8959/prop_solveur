@@ -39,20 +39,18 @@ orSymbol      = symbol "or"  <|> symbol "v"
 pTop, pBot, pProp :: Parser Formula
 pTop  = Top    <$  symbol "top"
 pBot  = Bottom <$  symbol "bot"
-pProp = Prop      <$> pIdent
+pProp = Prop   <$> pIdent
 
 pSimple :: Parser Formula
 pSimple = choice [parens pExpr, pTop, pBot, pProp]
 
-pNot, pOr, pAnd, pImplies, pLineBreak :: Parser Formula
-pNot       = (Not            <$  notSymbol <*> pSimple)          <|> pSimple
-pOr        = try (foldl1 Or  <$> pNot `sepBy2` orSymbol)         <|> pNot
-pAnd       = try (foldl1 And <$> pOr `sepBy2` andSymbol)         <|> pOr
-pImplies   = try (Implies    <$> pAnd <* impliesSymbol <*> pAnd) <|> pAnd
-pLineBreak = try (foldl1 And <$> pImplies `sepEndBy2` some eol)  <|> pImplies
-
-pExpr :: Parser Formula
-pExpr = pLineBreak
+pNot, pOr, pAnd, pImplies, pExpr :: Parser Formula
+pNot     = (Not            <$  notSymbol <*> pSimple)          <|> pSimple
+pOr      = try (foldl1 Or  <$> pNot `sepBy2` orSymbol)         <|> pNot
+pAnd     = try (foldl1 And <$> pOr `sepBy2` andSymbol)         <|> pOr
+pImplies = try (Implies    <$> pAnd <* impliesSymbol <*> pAnd) <|> pAnd
+pExpr    = try (foldl1 And <$> pImplies `sepEndBy2` some eol)  <|> pImplies
 
 pFormula :: Parser Formula
-pFormula = pExpr <* eof
+pFormula = between blankLines blankLines pExpr <* eof
+  where blankLines = skipMany eol
