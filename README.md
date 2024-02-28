@@ -11,8 +11,14 @@ This is an exponential operation, more sophisticated heuristics are planned to b
 1. Install `stack` with your favorite package manager.
 2. Run `stack run` to execute the program.
 
-# Read from file
+## Read from file
 Use `stack run -- -f path/to/file` to run with file as input.
+
+## Read from stdin
+Use `stack run -- --stdin` to read from stdin
+
+## Repl mode
+Use `stack run -- -r` to solve interactively.
 
 # Installation
 If you want to use this tool anywhere, simply do `stack install .`.

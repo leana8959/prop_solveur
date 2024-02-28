@@ -1,19 +1,22 @@
 module Main (main) where
 
 import Control.Monad (when)
-import Data.Bifunctor (Bifunctor(bimap, first))
+import Data.Bifunctor (Bifunctor(first))
 import qualified Data.Text as T
 import qualified Data.Text.IO as TIO
+import Options.Applicative
+  (ParserInfo, execParser, flag', fullDesc, header, help, helper, info, long,
+  optional, progDesc, short, strOption, (<**>), (<|>))
 import System.Console.ANSI
   (Color(Black, Blue, Red), ColorIntensity(Dull, Vivid),
   ConsoleIntensity(BoldIntensity, NormalIntensity), ConsoleLayer(Foreground),
   SGR(Reset, SetColor, SetConsoleIntensity), setSGR)
-import System.Environment (getArgs)
 import System.IO (IOMode(ReadMode), openFile)
 import Text.Pretty.Simple (pPrint)
 
 import Parser (pFormula)
 import Solver (showSolutions, solve)
+import System.Exit (exitSuccess)
 import Text.Megaparsec (errorBundlePretty, runParser)
 
 accentStyle, decorStyle, errorStyle, resetStyle :: [SGR]
@@ -38,19 +41,36 @@ say, scream :: String -> String -> IO ()
 say = putWithBorder accentStyle
 scream = putWithBorder errorStyle
 
+data Mode = Repl | File String | Stdin
+
+argsParser :: ParserInfo (Maybe Mode)
+argsParser = withInfo (p <**> helper)
+  where
+    withInfo = flip info
+      ( fullDesc
+        <> header "prop_solveur - a toy logic solver"
+        <> progDesc "If nothing is supplied, default into Repl mode"
+      )
+    p = optional
+      ( flag' Repl (long "repl" <> short 'r' <> help "Solve formulae interactively")
+        <|> flag' Stdin (long "stdin" <> help "Read from stdin")
+        <|> (File <$> strOption (long "file" <> short 'f' <> help "Read from file"))
+      )
+
 main :: IO ()
 main = do
-  args <- getArgs
-  (content, isRepl) <- case args of
-    (flag : _) | flag == "-" ->
-      (, False) <$> TIO.getContents
-    (flag : fname : _)
-      | flag == "-f" -> do
-        handle <- openFile fname ReadMode
-        (, False) <$> TIO.hGetContents handle
+  mode <- execParser argsParser
+
+  (content, isRepl) <- case mode of
+    Just (File fname) -> do
+      handle <- openFile fname ReadMode
+      (, False) <$> TIO.hGetContents handle
     _ -> do
       putStrLn "Please enter a logical formula, :q to quit"
-      (, True) <$> TIO.getLine
+      line <- TIO.getLine
+      if line == ":q"
+        then exitSuccess
+        else return (line, True)
 
   say "File contains" (T.unpack content)
 
