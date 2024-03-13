@@ -1,12 +1,14 @@
+{-# LANGUAGE ApplicativeDo #-}
 module Main (main) where
 
 import Control.Monad (when)
 import Data.Bifunctor (Bifunctor(first))
+import Data.Text (Text)
 import qualified Data.Text as T
 import qualified Data.Text.IO as TIO
 import Options.Applicative
   (ParserInfo, execParser, flag', fullDesc, header, help, helper, info, long,
-  optional, progDesc, short, strOption, (<**>), (<|>))
+  progDesc, short, strOption, (<**>), (<|>))
 import System.Console.ANSI
   (Color(Black, Blue, Red), ColorIntensity(Dull, Vivid),
   ConsoleIntensity(BoldIntensity, NormalIntensity), ConsoleLayer(Foreground),
@@ -28,51 +30,59 @@ resetStyle  = [Reset]
 putWithStyle :: [SGR] -> IO () -> IO ()
 putWithStyle st io = setSGR st <* io <* setSGR resetStyle
 
-putWithBorder :: [SGR] -> String -> String -> IO ()
+putWithBorder :: [SGR] -> Text -> Text -> IO ()
 putWithBorder st prompt text = do
-  let w    = ((80 - length prompt) `div` 2) - 2
+  let w    = ((80 - T.length prompt) `div` 2) - 2
       line = replicate w '='
   putWithStyle decorStyle $ putStr (line ++ " ")
-  putWithStyle st $ putStr prompt
+  putWithStyle st $ TIO.putStr prompt
   putWithStyle decorStyle $ putStrLn (" " ++ line)
-  putStrLn text
+  TIO.putStrLn text
 
-say, scream :: String -> String -> IO ()
+say, scream :: Text -> Text -> IO ()
 say = putWithBorder accentStyle
 scream = putWithBorder errorStyle
 
 data Mode = Repl | File String | Stdin
 
-argsParser :: ParserInfo (Maybe Mode)
+argsParser :: ParserInfo Mode
 argsParser = withInfo (p <**> helper)
   where
     withInfo = flip info
       ( fullDesc
         <> header "prop_solveur - a toy logic solver"
-        <> progDesc "If nothing is supplied, default into Repl mode"
+        <> progDesc "Solve logic formulaes"
       )
-    p = optional
-      ( flag' Repl (long "repl" <> short 'r' <> help "Solve formulae interactively")
-        <|> flag' Stdin (long "stdin" <> help "Read from stdin")
-        <|> (File <$> strOption (long "file" <> short 'f' <> help "Read from file"))
-      )
+    p = flag' Repl ( long "repl"
+                     <> short 'r'
+                     <> help "Solve interactively"
+                   )
+      <|> do
+            fname <- strOption (long "file" <> short 'f' <> help "Read from file, use dash to mean stdin")
+            return $ case fname of
+              "-" -> Stdin
+              _   -> File fname
 
 main :: IO ()
 main = do
   mode <- execParser argsParser
 
   (content, isRepl) <- case mode of
-    Just (File fname) -> do
+    File fname -> do
       handle <- openFile fname ReadMode
       (, False) <$> TIO.hGetContents handle
-    _ -> do
+
+    Stdin -> do
+      (, False) <$> TIO.getContents
+
+    Repl -> do
       putStrLn "Please enter a logical formula, :q to quit"
       line <- TIO.getLine
       if line == ":q"
         then exitSuccess
         else return (line, True)
 
-  say "File contains" (T.unpack content)
+  say "File contains" content
 
   let output = first errorBundlePretty
              . runParser pFormula (if isRepl then "repl" else "file")
@@ -82,8 +92,8 @@ main = do
     Right ast -> do
       let sols = solve ast
       say "Parsed" "" <* pPrint ast
-      say "Solutions" (showSolutions sols)
-      say ("There are " ++ show (length sols) ++ " solution(s)") ""
-    Left err -> scream "Failed to parse" err
+      say "Solutions" (T.pack $ showSolutions sols)
+      say ("There are " <> (T.pack . show $ length sols) <> " solution(s)") ""
+    Left err -> scream "Failed to parse" (T.pack err)
 
   when isRepl main
