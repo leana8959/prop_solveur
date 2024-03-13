@@ -17,36 +17,38 @@
     flake-utils.lib.eachDefaultSystem (system: let
       pkgs = import nixpkgs {inherit system;};
 
-      # need to match Stackage LTS version from stack.yaml resolver
       hPkgs = pkgs.haskell.packages.ghc947;
 
       devTools = [
         stack-wrapped
         hPkgs.ghc
-        hPkgs.stylish-haskell
         hPkgs.haskell-language-server
+        hPkgs.stylish-haskell
       ];
 
-      # Wrap Stack to work with our Nix integration. We don't want to modify
-      # stack.yaml so non-Nix users don't notice anything.
-      # --no-nix: We don't want Stack's way of integrating Nix.
-      # --system-ghc    # Use the existing GHC on PATH (will come from this Nix file)
-      # --no-install-ghc  # Don't try to install GHC if no matching GHC found on PATH
       stack-wrapped = pkgs.symlinkJoin {
-        name = "stack"; # will be available as the usual `stack` in terminal
+        name = "stack";
         paths = [pkgs.stack];
         buildInputs = [pkgs.makeWrapper];
         postBuild = ''
           wrapProgram $out/bin/stack \
-            --add-flags "\
-              --no-nix \
-              --system-ghc \
-              --no-install-ghc \
-            "
+            --add-flags "--no-nix --system-ghc --no-install-ghc"
         '';
       };
     in {
-      packages.default = pkgs.haskellPackages.callCabal2nix "prop-solveur" ./. {};
+      formatter = pkgs.alejandra;
+
+      packages.default = (pkgs.haskellPackages.callCabal2nix "prop-solveur" ./. {}).overrideAttrs (old: {
+        nativeBuildInputs = (old.nativeBuildInputs or []) ++ [pkgs.installShellFiles];
+        postInstall =
+          (old.postInstall or "")
+          + ''
+            installShellCompletion --cmd prop-solveur \
+                --bash <("$out/bin/prop-solveur" --bash-completion-script "$out/bin/prop-solveur") \
+                --fish <("$out/bin/prop-solveur" --fish-completion-script "$out/bin/prop-solveur") \
+                --zsh  <("$out/bin/prop-solveur" --zsh-completion-script  "$out/bin/prop-solveur")
+          '';
+      });
 
       devShells.default = pkgs.mkShell {
         buildInputs = devTools;
